@@ -83,7 +83,7 @@
         async function fetchAnswer() {
             const question = document.getElementById('user-question').value.trim();
             const answerBox = document.getElementById('answer-box');
-            const backendUrl = 'http://localhost:3000/api/ask'; // Try localhost first
+            const backendUrl = '/api/ask'; // Try localhost first
 
             if (!question) {
                 answerBox.textContent = "Please ask a question!";
@@ -93,7 +93,7 @@
             const sensitiveWords = ['politics', 'sex', 'drugs', 'transgender', 'homosexuality'];
             const questionLower = question.toLowerCase();
             if (sensitiveWords.some(word => questionLower.includes(word))) {
-                answerBox.textContent = "I can’t discuss that kind of sensitive content with you right now.";
+                answerBox.textContent = "I canâ€™t discuss that kind of sensitive content with you right now.";
                 return;
             }
 
