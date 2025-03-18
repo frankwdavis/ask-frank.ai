@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alabama School Assistant</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f2f5;
+            color: #4A4A4A;
+        }
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .big-title {
+            font-size: 36px;
+            font-weight: bold;
+            color: #A6192E;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        h1 {
+            color: #A6192E;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .input-box {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        #user-question {
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            resize: vertical;
+            min-height: 80px;
+        }
+        #ask-button {
+            padding: 10px;
+            font-size: 16px;
+            background-color: #A6192E;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        #ask-button:hover {
+            background-color: #7E1322;
+        }
+        #answer-box {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            background-color: #fafafa;
+            min-height: 100px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="big-title">Ask Frank - For Saraland Employees Only</div>
+        <h1>Alabama School Assistant</h1>
+        <div class="input-box">
+            <textarea id="user-question" placeholder="Ask me anything about Alabama public schools..."></textarea>
+            <button id="ask-button" onclick="fetchAnswer()">Ask</button>
+        </div>
+        <div id="answer-box">Your answer will appear here.</div>
+    </div>
+
+    <script>
+        async function fetchAnswer() {
+            const question = document.getElementById('user-question').value.trim();
+            const answerBox = document.getElementById('answer-box');
+            const backendUrl = 'http://localhost:3000/api/ask'; // Try localhost first
+
+            if (!question) {
+                answerBox.textContent = "Please ask a question!";
+                return;
+            }
+
+            const sensitiveWords = ['politics', 'sex', 'drugs', 'transgender', 'homosexuality'];
+            const questionLower = question.toLowerCase();
+            if (sensitiveWords.some(word => questionLower.includes(word))) {
+                answerBox.textContent = "I can’t discuss that kind of sensitive content with you right now.";
+                return;
+            }
+
+            answerBox.textContent = "Fetching your answer...";
+
+            try {
+                const requestBody = { query: question, context: "Alabama public school system" };
+                console.log('Sending request to:', backendUrl, requestBody);
+
+                const response = await fetch(backendUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(requestBody),
+                    mode: 'cors', // Ensure CORS compatibility
+                    cache: 'no-cache' // Prevent caching issues
+                });
+
+                console.log('Response status:', response.status, 'OK:', response.ok, 'Headers:', response.headers);
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`Server error: ${response.status} - ${errorText}`);
+                }
+
+                const data = await response.json();
+                console.log('Received data:', data);
+                answerBox.textContent = data.answer || "No answer found.";
+            } catch (error) {
+                answerBox.textContent = `Error: ${error.message}`;
+                console.error('Fetch Error:', error);
+            }
+        }
+
+        document.getElementById('user-question').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                fetchAnswer();
+            }
+        });
+    </script>
+</head>
+</html>
